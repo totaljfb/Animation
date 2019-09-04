@@ -18,6 +18,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private View view3;
     private FloatingActionButton fab;
     private FloatingButtonStatus fabstatus = Initiate;
+    private ViewHandler viewHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,6 +30,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         view1 = findViewById(R.id.imageView1);
         view2 = findViewById(R.id.imageView2);
         view3 = findViewById(R.id.imageView3);
+        viewHandler = new ViewHandler(view1, view2, view3);
     }
 
     @Override
@@ -116,6 +118,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
 
             default:
+                break;
+        }
+    }
+    @Override
+    public void onBackPressed(){
+        switch(fabstatus){
+            case Initiate:
+                System.exit(-1);
+                break;
+            case Navigate:
+
+                fabstatus = Initiate;
+                break;
+            case Stop:
+
+                fabstatus = Navigate;
                 break;
         }
     }
