@@ -7,6 +7,11 @@ import android.animation.ValueAnimator;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import static com.example.viewanimation.FloatingButtonStatus.*;
@@ -16,9 +21,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private View view1;
     private View view2;
     private View view3;
+    private ListView listView;
     private FloatingActionButton fab;
     private FloatingButtonStatus fabstatus = Initiate;
     private ViewHandler viewHandler;
+    private String[] values = new String[] { "Android", "iPhone", "WindowsMobile",
+            "Blackberry", "WebOS", "Ubuntu", "Windows7", "Max OS X",
+            "Linux", "OS/2", "Ubuntu", "Windows7", "Max OS X", "Linux",
+            "OS/2", "Ubuntu", "Windows7", "Max OS X", "Linux", "OS/2",
+            "Android", "iPhone", "WindowsMobile" };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,7 +41,35 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         view1 = findViewById(R.id.imageView1);
         view2 = findViewById(R.id.imageView2);
         view3 = findViewById(R.id.imageView3);
-        viewHandler = new ViewHandler(view1, view2, view3);
+        listView = (ListView) findViewById(R.id.listview1);
+        viewHandler = new ViewHandler(view1, view2, view3, listView);
+
+        listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
+        //listView.setItemChecked(2, true);
+
+        TextView textView = new TextView(this);
+        textView.setText("Please select a starting and an ending point:");
+
+        listView.addHeaderView(textView);
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
+                android.R.layout.simple_list_item_multiple_choice, values);
+        listView.setAdapter(adapter);
+
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                // When clicked, show a toast with the TextView text
+                /*Toast.makeText(getApplicationContext(),
+                        ((TextView) view).getText(), Toast.LENGTH_SHORT).show();*/
+                if(listView.getCheckedItemCount()<=2){
+                   listView.setEnabled(true);
+                }
+                else{
+                    listView.setEnabled(false);
+                }
+            }
+        });
+
     }
 
     @Override
@@ -44,74 +83,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.floatingActionButton2:
                 switch (fabstatus){
                     case Initiate:
-                        h = view2.getHeight();
-                        layoutParams = view3.getLayoutParams();
-                        layoutParams.height = h/2;
-                        view3.setLayoutParams(layoutParams);
-                        objectAnimator = ObjectAnimator.ofFloat(view3, "y", h, h/2);
-                        objectAnimator.setDuration(500);
-                        objectAnimator.start();
-
-                        va = ValueAnimator.ofInt(h,h/2);
-                        va.setDuration(mDuration);
-                        va.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-                            public void onAnimationUpdate(ValueAnimator animation) {
-                                int val = (Integer) animation.getAnimatedValue();
-                                ViewGroup.LayoutParams layoutParams = view2.getLayoutParams();
-                                layoutParams.height = val;
-                                view2.setLayoutParams(layoutParams);
-                            }
-                        });
-                        va.start();
-
-                        objectAnimator = ObjectAnimator.ofFloat(view2, "y", 0, 0);
-                        objectAnimator.setDuration(500);
-                        objectAnimator.start();
-                        fabstatus = Navigate;
-                        fab.setImageResource(android.R.drawable.ic_menu_directions);
+                        fabstatus = viewHandler.Scene1To2(fab);
                         break;
                     case Navigate:
-                        h = view2.getHeight();
-                        objectAnimator = ObjectAnimator.ofFloat(view3, "y", h, 2*h);
-                        objectAnimator.setDuration(500);
-                        objectAnimator.start();
-
-                        objectAnimator = ObjectAnimator.ofFloat(view2, "y", 0, h);
-                        objectAnimator.setDuration(500);
-                        objectAnimator.start();
-
-                        layoutParams = view1.getLayoutParams();
-                        layoutParams.height = h;
-                        view1.setLayoutParams(layoutParams);
-                        objectAnimator = ObjectAnimator.ofFloat(view1, "y", -h, 0);
-                        objectAnimator.setDuration(500);
-                        objectAnimator.start();
-                        fabstatus = Stop;
-                        fab.setImageResource(android.R.drawable.presence_busy);
+                        fabstatus = viewHandler.Scene2To3(fab);
                         break;
                     case Stop:
-                        h = view1.getHeight();
-                        objectAnimator = ObjectAnimator.ofFloat(view1, "y", 0, -h);
-                        objectAnimator.setDuration(500);
-                        objectAnimator.start();
-
-                        va = ValueAnimator.ofInt(h,2*h);
-                        va.setDuration(mDuration);
-                        va.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-                            public void onAnimationUpdate(ValueAnimator animation) {
-                                int val = (Integer) animation.getAnimatedValue();
-                                ViewGroup.LayoutParams layoutParams = view2.getLayoutParams();
-                                layoutParams.height = val;
-                                view2.setLayoutParams(layoutParams);
-                            }
-                        });
-                        va.start();
-
-                        objectAnimator = ObjectAnimator.ofFloat(view2, "y", 2*h, 0);
-                        objectAnimator.setDuration(500);
-                        objectAnimator.start();
-                        fabstatus = Initiate;
-                        fab.setImageResource(android.R.drawable.ic_menu_search);
+                        fabstatus = viewHandler.Scene3To1(fab);
                         break;
                     default:
                         break;
@@ -128,12 +106,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 System.exit(-1);
                 break;
             case Navigate:
-
-                fabstatus = Initiate;
+                fabstatus = viewHandler.Scene2To1(fab);
                 break;
             case Stop:
-
-                fabstatus = Navigate;
+                fabstatus = viewHandler.Scene3To2(fab);
                 break;
         }
     }
